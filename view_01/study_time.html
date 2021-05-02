@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<!-- 	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+	<script src="../js/vue.js"></script>
+	<script src="../js/axios.js"></script>
+	<style>
+		/*价格搜索input框*/
+		input,
+		button {
+			border: none;
+			outline: none;
+		}
+
+		.tl-price-input {
+			width: 100%;
+			border: 1px solid #ccc;
+			padding: 7px 0;
+			background: #F4F4F7;
+			border-radius: 3px;
+			padding-left: 5px;
+			-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+			box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+			-webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+			-o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+			transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s
+		}
+
+		.tl-price-input:focus {
+			border-color: #66afe9;
+			outline: 0;
+			-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+			box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6)
+		}
+
+		.ant-btn {
+			line-height: 1.499;
+			position: relative;
+			display: inline-block;
+			font-weight: 400;
+			white-space: nowrap;
+			text-align: center;
+			background-image: none;
+			border: 1px solid transparent;
+			-webkit-box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
+			box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
+			cursor: pointer;
+			-webkit-transition: all .3s cubic-bezier(.645, .045, .355, 1);
+			transition: all .3s cubic-bezier(.645, .045, .355, 1);
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			-ms-touch-action: manipulation;
+			touch-action: manipulation;
+			height: 32px;
+			padding: 0 15px;
+			font-size: 14px;
+			border-radius: 4px;
+			color: rgba(0, 0, 0, 0.65);
+			background-color: #fff;
+			border-color: #d9d9d9;
+		}
+
+		.ant-btn-primary {
+			color: #fff;
+			background-color: #1890ff;
+			border-color: #1890ff;
+			text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+			-webkit-box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+			box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+		}
+
+		.ant-btn-red {
+			color: #fff;
+			background-color: #FF5A44;
+			border-color: #FF5A44;
+			text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+			-webkit-box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+			box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+		}
+		.ant-btn-yellow {
+			color: black;
+			background-color: yellow;
+			border-color: yellow;
+			text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+			-webkit-box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+			box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+		}
+		.ant-btn-green {
+			color: white;
+			background-color: green;
+			border-color: green;
+			text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+			-webkit-box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+			box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+		}
+	</style>
+	<body>
+		<div id="app">
+			<div>
+				<div style="width: 60px;float: left;margin-left: 20px" v-show="!flag"><button class="ant-btn ant-btn-yellow" @click="start()">start</button></div>
+				<div style="width: 60px;float: left;margin-left: 20px" v-show="flag"><button class="ant-btn ant-btn-red" @click="end()">end</button></div>
+				<div style="width: 60px;float: left;margin-left: 20px"><button class="ant-btn ant-btn-green" @click="hourClear()">hourClear</button></div>
+			</div>
+			<br />
+			<div>
+				<h1 style="font-size: 100px;text-align: center;">{{hour}} 小时 {{minute}} 分钟</h1>
+				<h2 v-show="flag" style="font-size: 50px;text-align: center;color: red;">I'm studing。。。。。。。。。。</h2>
+			</div>
+		</div>
+
+		<script>
+			new Vue({
+				el: '#app',
+				data: {
+					startTime:0,
+					endTime:0,
+					resultTime:0,
+					hour:0,
+					minute:0,
+					flag:false
+				},
+				methods: {
+					async start() {
+						debugger
+						await this.getTime("start");
+						debugger
+						this.flag = true;
+						this.startTime = new Date().getTime()
+						console.log('哈哈哈哈' + this.startTime)
+						await this.setTime()
+					},
+					async end() {
+						debugger
+						await this.getTime("end")
+						debugger
+						this.flag = false;
+						this.endTime = new Date().getTime()
+						console.log('结束' + this.endTime)
+						this.resultTime = Number(this.endTime) - Number(this.startTime)
+						this.resultTime = this.resultTime / 1000
+						console.log("resultTime:" + this.resultTime)
+
+						var hourNow = 0;
+						// console.log("hourNow:"+hourNow)
+						var minuteNow = Number(this.minute) + Math.round(this.resultTime / 60);
+						console.log("minute:" + minuteNow)
+
+						while (minuteNow > 60) {
+							minuteNow = minuteNow - 60;
+							hourNow++;
+						}
+
+						this.minute = minuteNow;
+						this.hour = this.hour + hourNow;
+						await this.setTime()
+					},
+					async hourClear() {
+						await this.getTime()
+						this.hour = 0;
+						await this.setTime()
+					},
+					async setTime(){
+						debugger
+						console.log("setTime-------------------------------------")
+						console.log(this.hour)
+						console.log(this.minute)
+						console.log(this.resultTime)
+						console.log(this.flag)
+						console.log(this.startTime)
+						console.log(this.endTime)
+					
+						var that = this;
+						await axios.put("http://guixiansongstudio.xyz:2021/setTime",{"hour":this.hour,"munite":this.minute,"flag":this.flag,"resultTime":this.resultTime,"startTime":this.startTime,"endTime":this.endTime}).then(function(response) {
+							debugger
+							console.log(response);
+						}).catch(function(err) {
+							console.log(err)
+						})
+					},
+					async getTime(type){
+						debugger
+						var that=this;
+						await axios.get("http://guixiansongstudio.xyz:2021/getTime").then(function(response){
+							debugger
+							console.log(response.data)
+							that.hour=response.data.hour;
+							that.minute=response.data.munite;
+							that.resultTime=response.data.resultTime;
+							that.startTime=response.data.startTime;
+							that.endTime=response.data.endTime;
+							// that.flag=response.data.flag;
+							// console.log(that.hour)
+							// console.log(that.minute)
+							// console.log(that.resultTime)
+							// console.log(that.flag)
+							// console.log(that.startTime)
+							// console.log(that.endTime)
+						},function(err){
+							console.log(err)
+						})
+						console.log("getTime----------------------------")
+						console.log(this.hour)
+						console.log(this.minute)
+						console.log(this.resultTime)
+						console.log(this.flag)
+						console.log(this.startTime)
+						console.log(this.endTime)
+					}
+				},
+				async created(){
+					debugger
+					var that=this;
+					await axios.get("http://guixiansongstudio.xyz:2021/getTime").then(function(response){
+						console.log(response.data)
+						debugger
+						that.hour=response.data.hour;
+						that.minute=response.data.munite;
+						that.resultTime=response.data.resultTime;
+						that.startTime=response.data.startTime;
+						that.endTime=response.data.endTime;
+						that.flag=response.data.flag;
+						// console.log(that.hour)
+						// console.log(that.minute)
+						// console.log(that.resultTime)
+						// console.log(that.flag)
+						// console.log(that.startTime)
+						// console.log(that.endTime)
+					},function(err){
+						console.log(err)
+					})
+					console.log("getTime----------------------------")
+					console.log(this.hour)
+					console.log(this.minute)
+					console.log(this.resultTime)
+					console.log(this.flag)
+					console.log(this.startTime)
+					console.log(this.endTime)
+				}
+			})
+		</script>
+	</body>
+</html>

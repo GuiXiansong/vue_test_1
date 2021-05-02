@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script src="../js/axios.js"></script>
+		<script src="../js/vue.js"></script>
+	</head>
+	<body>
+		<div id="app">
+			<input placeholder="请输入城市" @keyup.enter="query" v-model="ins" />
+			<label>{{ins}}</label>
+			<div>
+				<a href="javascript:;" @click="queryAuto('北京')">北京</a>
+				<a href="javascript:;" @click="queryAuto('上海')">上海</a>
+				<a href="javascript:;" @click="queryAuto('深圳')">深圳</a>
+				<a href="javascript:;" @click="queryAuto('广州')">广州</a>
+			</div>
+			<ul v-if="weatherList.length!=0">
+				<li v-show="weatherList.length!=0" v-for="item in weatherList">
+					<div><span>{{item.type}}</span></div>
+					<div><span>{{item.date}}</span></div>
+					<div>
+						<b>{{item.low}}</b>
+						~
+						<b>{{item.high}}</b>
+					</div>
+					<div><span>{{item.fengli}}{{item.fengxiang}}</span></div>
+				</li>
+			</ul>
+		</div>
+
+		<script>
+			new Vue({
+				el: "#app",
+				data: {
+					ins: "",
+					weatherList: []
+				},
+				methods: {
+					query: function() {
+						var that = this;
+						axios.get("http://wthrcdn.etouch.cn/weather_mini?city=" + this.ins).then(function(response) {
+							console.log(response)
+							that.weatherList = response.data.data.forecast
+						}).catch(function(err) {
+							console.log(err)
+							that.weatherList=[]
+						})
+					},
+					queryAuto:function(city){
+						this.ins=city;
+						this.query();
+					}
+				}
+			})
+		</script>
+	</body>
+</html>

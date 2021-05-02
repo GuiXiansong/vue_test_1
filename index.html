@@ -1,0 +1,131 @@
+<template>
+    <div>
+        <!--
+          ls-form：mixin定义的form组件，form是html原生标签，所以添加ls-加以区分
+          form-item：mixin定义的form-item组件，form-item不是html原生标签，所以直接使用
+          formData: Object类型，固定属性不可改名，formData的key在本页面自定义；
+        -->
+        <ls-form ref="form" :model="formData" inline>
+            <form-item prop="appNo" label="工单编号">
+                <ls-input v-model="formData.appNo"/>
+            </form-item>
+            <form-item>
+                <!--
+                  query: Function类型，固定属性不可改名，query函数在本页面自定义；
+                -->
+                <ls-button type="primary" @click="query">查询</ls-button>
+                <ls-button @click="formClear">清空</ls-button>
+            </form-item>
+        </ls-form>
+
+        <!--
+            DataExport：或data-export，mixin内部定义的组件，数据导出组件，固定写法
+            table-name：导出对应的ls-table组件，值为ls-table的ref属性
+            useCurrentPage: mixin内部定义，固定写法不可更改；当前页号
+            useCurrentPageSize: mixin内部定义，固定写法不可更改；当前每页数据量
+            useExportOption: mixin内部定义，固定写法不可更改；导出配置，包含url，filter
+        -->   
+        <DataExport
+            table-name="tb" :current-page="useCurrentPage" :page-size="useCurrentPageSize"
+            :option="useExportOption"
+        />
+
+        <!--
+            ls-table：mixin定义的table组件，table是html原生标签，所以添加ls-加以区分
+            table-column：mixin定义的table-column组件，table-column不是html原生标签，所以直接使用
+            useTableData: mixin内部定义，固定写法不可更改；表格数据
+            useRowSelect: mixin内部定义，固定写法不可更改；行选择的回调函数，多选则用@selection-change="useRowSelect"，
+                有这个配置后，可以直接使用this.useSelectedRows获取选中的行，单选是Object，多选是Array
+            useExportOption: mixin内部定义，固定写法不可更改；导出配置，包含url，filter
+        -->
+        <ls-table ref="tb" row-key="taskId" :data="useTableData" highlight-current-row @current-change="useRowSelect">
+            <table-column label="流程分类" prop="processTypeName"/>
+            <table-column label="流程名称" prop="processName"/>
+            <table-column label="工单编号" prop="appNo"/>
+            <table-column label="活动名称" prop="nodeName"/>
+            <table-column label="状态" prop="curStateLabel"/>
+        </ls-table>
+
+        <!--
+            pagination：mixin定义的pagination组件，pagination不是html原生标签，所以直接使用
+            useSizeChange: mixin内部定义，固定写法不可更改；分页时每页数量改变的回调函数
+            useCurrentChange: mixin内部定义，固定写法不可更改；分页时当前页改变的回调函数
+            usePageSizes: mixin内部定义，固定写法不可更改；分页下拉对应的数组，默认为[10, 50, 100, 500]
+            useCurrentPageSize: mixin内部定义，固定写法不可更改；分页时当前每页数量
+            useTotal: mixin内部定义，固定写法不可更改；分页时表格数据总量
+        -->
+        <pagination
+            @size-change="useSizeChange"
+            @current-change="useCurrentChange"
+            :current-page="useCurrentPage"
+            :page-sizes="usePageSizes"
+            :page-size="useCurrentPageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="useTotal"
+        />
+    </div>
+</template>
+<script>
+    import {formTable} from 'muse-poseidon-plugins'
+    import {ComDataGet} from '../services' //数据请求自定义
+    import {tableExport} from 'vmd-ui'
+
+    const pathname = window._config ? window._config.baseURL : ''
+      Vue.use(tableExport, {
+          pathname: pathname && pathname.replace(/^\//, '')
+      })
+
+    export default {
+        //载入formTable的mixin
+        mixins: [formTable],
+        data() {
+            return {
+                //formData: 固定写法不可改名，里面的key可以自定义
+                formData: {
+                    appNo: ''
+                }   
+            }
+        },
+        methods: {
+            formClear() {
+                this.$refs.form.resetFields()
+            },
+            query() {
+                // 以下为service示例
+                // 入参固定写法，传入两个参数：
+                //  1：formData: 表格数据
+                //  2：分页配置: 
+                    //  currentPage: 当前页号
+                    //  currentPageSize: 当前页数据量
+                //serializeParams: 请求参数转换函数，在src/utils/index.js里，需通过import引入
+
+               /*const ComDataGet = (formData, {currentPage, currentPageSize}) => {
+                  const _filter = serializeParams(formData)
+                  return xhr.get(`/processWorklistCom/getWorklistComData`, {
+                    params: `{"filter":"${_filter}","pageIndex":${currentPage},"pageSize":${currentPageSize}}`
+                  }).then(([err, res]) => {
+                    return [
+                      err,
+                      {
+                        // service放在一个文件里可以统一管理，所以vue文件无法获取url和filter。
+                        // 返回值里，添加exportOption
+                        exportOption: {
+                          url: `/processWorklistCom/getWorklistComData`,
+                          filter: `${_filter}`
+                        },
+                        ...res
+                      }
+                    ]
+                  })
+                }*/
+
+                // useQuery: 固定写法，不可更改，传入service入参，mixin内部自动查询数据并添入表格
+                this.useQuery(ComDataGet)
+            }
+        },
+        mounted() {
+            // 在mounted里添加this.query()使得页面初次进入就能在表格里查询出数据
+            this.query()
+        },
+    }
+</script>

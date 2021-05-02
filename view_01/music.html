@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<!-- <script src="../js/vue_dev.js"></script> -->
+		<!-- <script src="../js/axios.js"></script> -->
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<style>
+			.left {
+				/* width: 200px;| */
+				width: 30%;
+				height: 100%;
+				/* background: white; */
+				margin: 0px;
+				padding: 0px 0px 5px 0px;
+				color: #181cff;
+				float: left;
+			}
+
+			.center {
+				/* width: 400px; */
+				width: 30%;
+				height: 100%;
+				/* background: blue; */
+				margin: 0px 2px;
+				padding: 0px 0px 5px 0px;
+				/* color: #d8ecff; */
+				color: #B22222;
+				float: left;
+			}
+
+			.right {
+				/* width: 176px; */
+				width: 30%;
+				height: 100%;
+				/* background: pink; */
+				margin: 0px;
+				padding: 0px 0px 5px 0px;
+				color: chartreuse;
+				/* color: #d8ecff; */
+				float: right;
+			}
+
+			.picImage {
+				width: 220px;
+				height: 220px;
+			}
+
+			.userImage {
+				width: 30px;
+				height: 30px;
+			}
+
+
+			/* 图片旋转动画 */
+			.n_animation_picture {
+				text-align: center;
+			}
+
+			@-webkit-keyframes rotation {
+				from {
+					-webkit-transform: rotate(0deg);
+				}
+
+				to {
+					-webkit-transform: rotate(360deg);
+				}
+			}
+
+			.n_picture_adm {
+				-webkit-transform: rotate(360deg);
+				animation: rotation 2s linear infinite;
+				-moz-animation: rotation 2s linear infinite;
+				-webkit-animation: rotation 2s linear infinite;
+				-o-animation: rotation 2s linear infinite;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<div>
+				<span>听音乐</span>
+				<span><input @keyup.enter="search()" v-model="param" /></span>
+				<span><button @click="search(param)">搜索</button></span>
+			</div>
+			<div>
+				<audio :src="musicUrl" ref="audio" controls autoplay loop @play="play" @pause="pause"></audio>
+			</div>
+<!-- 			<video>
+				<video src="" controls="controls"></video>
+			</video> -->
+			<div v-show="mvUrl!=''" style="display: none;">
+				<video :src="mvUrl" controls="controls" :src="mvUrl"></video>
+				<div></div>
+			</div>
+			<div>
+				<div class="left">
+					<ul v-for="item in musicList">
+						<li>{{item.name}}</li>
+						<button @click="start(item.id)">播放</button>
+						<button @click="mvStart(item.mvid)">MV</button>
+					</ul>
+				</div>
+				<div class="center">
+					<img v-bind:src="picUrl" class="picImage" :class="isPlaying ? 'n_picture_adm':''" v-if="hotComments.length!=0" />
+				</div>
+				<div class="right">
+					<dl v-for="item in hotComments">
+						<div>
+							<span><dt><img v-bind:src="item.user.avatarUrl" class="userImage" /></dt></span>
+							<span><dt>{{item.user.nickname}}</dt></span>
+						</div>
+						<dt>{{item.content}}</dt>
+					</dl>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			new Vue({
+				el: "#app",
+				data: {
+					param: "",
+					musicUrl: "",
+					musicList: [],
+					picUrl: "",
+					hotComments: [],
+					isPlaying: false,
+					mvUrl: ""
+
+				},
+				methods: {
+					search: function() {
+						console.log(this.param)
+						var that = this
+						axios.get("https://autumnfish.cn/search?keywords=" + this.param).then(
+							function(response) {
+								console.log(response.data.result.songs)
+								that.musicList = response.data.result.songs
+							}).catch(function(err) {
+							console.log(err)
+						})
+					},
+					// 播放方法
+					start: function(musicId) {
+						var that = this;
+						axios.get("https://autumnfish.cn/song/url?id=" + musicId).then(function(response) {
+							console.log(response)
+							that.musicUrl = response.data.data[0].url;
+							console.log(that.musicUrl)
+							that.lookJpg(musicId)
+							that.getHotComments(musicId)
+						}, function(err) {
+							console.log(err)
+						})
+					},
+					//将播放时对应的图片加载出来
+					lookJpg: function(musicId) {
+						this.picUrl = ''
+						this.hotComments = []
+						var that = this;
+						axios.get("https://autumnfish.cn/song/detail?ids=" + musicId).then(function(response) {
+							console.log("图片")
+							console.log(response)
+							console.log(response.data.songs[0].al.picUrl)
+							that.picUrl = response.data.songs[0].al.picUrl;
+						}, function(err) {})
+					},
+					getHotComments: function(musicId) {
+						var that = this;
+						axios.get("https://autumnfish.cn/comment/hot?type=0&id=" + musicId).then(function(response) {
+							console.log("评论")
+							console.log(response)
+							that.hotComments = response.data.hotComments;
+						}, function(err) {
+							console.log(err)
+						})
+					},
+					play: function() {
+						console.log("开始播放")
+						this.isPlaying = true
+					},
+					pause: function() {
+						console.log("播放结束")
+						this.isPlaying = false
+					},
+					mvStart: function(mvId) {
+						var that=this;
+						axios.get("https://autumnfish.cn/mv/url?id=" + mvId).then(
+							function(response) {
+								console.log(response)
+								that.mvUrl=response.data.data.url;
+								console.log(that.mvUrl)
+							},
+							function(err) {
+								console.log(err)
+							}
+						)
+
+					}
+				}
+			})
+		</script>
+	</body>
+</html>

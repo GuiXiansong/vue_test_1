@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script src="../js/vue.js"></script>
+	</head>
+	<body>
+		<div id="app">
+			<p v-if="seen">现在你看到我了</p>
+			<a v-bind:href="url">...</a>
+			
+			<div v-bind:class="{active:isActive}" 
+			style="width: 200px;height: 200px;text-align: center;
+			line-height: 200px;">
+			hi Vue
+			</div>
+		</div>
+		
+		
+		<script>
+			var vm = new Vue({
+				el: '#app',
+				data: {
+					seen: false,
+					url:"http://172.26.21.230:9080/smambdd-server/dd/div/spConfirm/spInput?appNo=2021012400300379&orgNo=1340107&ym=202101",
+					isActive:true
+				}
+			})
+		</script>
+		<style>
+			.active{background: #0000FF;}
+		</style>
+	</body>
+</html>

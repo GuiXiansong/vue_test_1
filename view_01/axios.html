@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script src="../js/vue.js"></script>
+	</head>
+	<body>
+
+		<div id="app">
+			<button @click="get">get请求</button>
+			<button @click="post">post请求</button>
+			<label v-model="message">{{this.message}}</label>
+		</div>
+
+		<script>
+			new Vue({
+				el: "#app",
+				data: {
+					message: "哈哈哈"
+				},
+				methods: {
+					get: function() {
+						var that = this;
+						axios.get("https://autumnfish.cn/api/joke").then(
+							function(response) {
+								console.log(response.data)
+								that.message = "啦啦啦啦"
+								that.message = response.data
+							},
+							function(err) {
+								console.log(err)
+							})
+					},
+					post: function() {
+
+					}
+				}
+
+			})
+			/* 			document.querySelector(".get").onclick = function() {
+							axios.get("guixiansongstudio.xyz").then(function(response) {
+								console.log(response)
+							}, function(err) {
+								console.log(err)
+							})
+						} */
+
+			/* 			new Vue({
+							el: "#app",
+							methods: {
+								get() {
+									axios({
+										method: 'get',
+										url: 'guixiansongstudio.xyz'
+									}).then(function(res) {
+										console.log(res.data.name);
+									}, function(err) {
+										console.log(err)
+									});
+								},
+								post: function() {
+									console.log("hhhhhh")
+								}
+							}
+						}); */
+		</script>
+	</body>
+</html>

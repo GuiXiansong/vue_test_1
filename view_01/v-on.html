@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>v-on测试</title>
+	</head>
+	<body>
+		<script src="../js/vue.js"></script>
+		
+		<div id="app">
+			<button @click="dolt('来了','转世')">点击</button>
+			<!-- 监听  enter 键的动作 -->
+			<input @keyup.enter="enter" />
+		</div>
+		
+		<script>
+			new Vue({
+				el:"#app",
+				methods:{
+					dolt:function(p1,pw2){
+						alert(p1+pw2)
+					},
+					enter:function(){
+						alert("哈哈哈哈")
+					}
+				}
+			})
+		</script>
+	</body>
+</html>
